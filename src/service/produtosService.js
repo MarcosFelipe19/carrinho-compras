@@ -6,7 +6,7 @@ class ProdutosService{
     }
     
     async verificaProdutoDisponivel(idProduto){
-        const produto = this.produtosRepository.find(idProduto)
+        const produto = await this.produtosRepository.find(idProduto)
 
         return produto
     }

@@ -1,0 +1,20 @@
+[
+    {
+        "id": "01JRK4670J4B3VK7F4NW4Y5F4B",
+        "name": "Chair",
+        "preco": "638.00",
+        "qtd": 27
+    },
+    {
+        "id": "01JRK4670KMW6CBZ5CBVECF59G",
+        "name": "Chair",
+        "preco": "400.59",
+        "qtd": 24
+    },
+    {
+        "id": "01JRK4670K26SHVDMTQBP6DC81",
+        "name": "Salad",
+        "preco": "858.80",
+        "qtd": 20
+    }
+]

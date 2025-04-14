@@ -1,0 +1,23 @@
+{
+  "name": "carrinho-compras",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "seed": "node ./seed/",
+    "test": "npx mocha ./test/unitTests/**.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@faker-js/faker": "^9.6.0",
+    "chai": "^4.2.0",
+    "mocha": "^11.1.0",
+    "nodemon": "^3.1.9",
+    "sinon": "^20.0.0"
+  }
+}

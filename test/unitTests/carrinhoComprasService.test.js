@@ -2,11 +2,14 @@ const {describe, before, beforeEach, afterEach} = require('mocha')
 const {join} = require('path')
 const ProdutosService = require('../../src/service/ProdutosService')
 const CarrinhoService = require('../../src/service/carrinhoService')
-const {expect} = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+const chai = require('chai')
+chai.use(chaiAsPromised)
+const {expect} = chai
 const sinon = require('sinon')
 
 const produtoDataBase = join(__dirname, "../../", "database/produtos.json")
-const carrinhoDataBase = join(__dirname, "../../", "database/carrinho.json")
+const carrinhoDataBase = join(__dirname, "../../", "sdatabase/carrinho.json")
 
 const mocks = {
     validProduto: require('../mocks/valid-produto.json'),
@@ -59,10 +62,8 @@ describe('Suite Test Carrinho de compras', ()=>{
             produtosService.produtosRepository.find.name
         ).resolves(null)
 
-        const expected = new Error(`Produto com o ID ${idProduto} não encontrado`)
+        const expected = `Produto com o ID ${idProduto} não encontrado`
         const result = produtosService.verificaProdutoDisponivel(idProduto)
-        
-
 
         expect(produtosService.produtosRepository.find.calledOnce).to.be.ok
         expect(produtosService.produtosRepository.find.calledWithExactly(idProduto)).to.be.ok

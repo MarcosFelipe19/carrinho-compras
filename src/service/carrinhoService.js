@@ -19,7 +19,6 @@ class ProdutosService{
 
         if(produtoExistente){
             produtoExistente.qtd += 1
-            console.log(carrinho)
             return carrinho
         }
         return carrinho

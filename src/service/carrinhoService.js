@@ -7,45 +7,36 @@ class ProdutosService{
     constructor({carrinho}){
         this.carrinhoRepository = new RepositoryCarrinho({file: carrinho})
     }
-    async estaNoCarrinho(idProduto, idCarrinho){
-        const carrinho = await this.carrinhoRepository.find(idCarrinho)
 
-        const contem = carrinho.produtos.find(({ids}) => ids === idProduto)
-
-        if(contem){
-            return true
-        }
-        return false
-    }
     async incrementaMaisUm(idProduto, idCarrinho){
-        const contem = await this.estaNoCarrinho(idProduto, idCarrinho)
-        console.log(contem)
         let carrinho = await this.carrinhoRepository.find(idCarrinho)
+        
+        if (!carrinho) {
+            throw new Error(`Carrinho com ID ${idCarrinho} não encontrado.`)
+         }
 
-        if(contem){
-            carrinho.produtos = carrinho.produtos.map((produto) => {
-                if(produto.ids === idProduto){
-                    produto.qtd = produto.qtd + 1
-                }
-                return produto
-            })
+        const produtoExistente = carrinho.produtos.find(({ id }) => id === idProduto)
+
+        if(produtoExistente){
+            produtoExistente.qtd += 1
+            console.log(carrinho)
             return carrinho
         }
-        return false
+        return carrinho
     }
 
     async adicionaNovoProduto(idProduto, idCarrinho){
-        const contem = await this.incrementaMaisUm(idProduto, idCarrinho)
+        const carrinho = await this.incrementaMaisUm(idProduto, idCarrinho)
 
-        if(contem){
-            return contem
+        if(carrinho.produtos.find(({id}) => id === idProduto)){
+            return carrinho
         }
+
         const produtos = new RepositoryProduto({file: produtoDataBase})
-        const carrinho = await this.carrinhoRepository.find(idCarrinho)
     
         const produto = await produtos.find(idProduto)
 
-        carrinho.produtos =  [...carrinho.produtos, produto]
+        carrinho.produtos.push(produto)
 
         return carrinho
     }

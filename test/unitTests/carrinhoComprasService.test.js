@@ -33,7 +33,7 @@ describe('Suite Test Carrinho de compras', ()=>{
         sandbox.restore()
     })
 
-    it("verifica se o produto 'x' está disponível e  então retorna o produto 'x'", async ()=>{
+    it("Deve retornar o produto quando ele estiver disponível", async ()=>{
         const produto = mocks.validProduto
         const idProduto = produto.id
 
@@ -51,34 +51,27 @@ describe('Suite Test Carrinho de compras', ()=>{
         expect(produtosService.produtosRepository.find.calledWithExactly(produto.id)).to.be.ok
         expect(result).to.be.deep.equal(expected)
     })
+    it("Deve retornar um Error quando o produto não estiver disponível", async ()=>{
+        const idProduto = "12ddg56"
 
-    it("verifica se o produto 'x' já foi adicionado ao carrinho  se sim, retorna true", async ()=>{
-        const produto = mocks.validProduto
-        const carrinho = Object.create(mocks.validCarrinho)
+        sandbox.stub(
+            produtosService.produtosRepository,
+            produtosService.produtosRepository.find.name
+        ).resolves(null)
+
+        const expected = new Error(`Produto com o ID ${idProduto} não encontrado`)
+        const result = produtosService.verificaProdutoDisponivel(idProduto)
         
-        carrinho.produtos = [{ids: produto.id, qtd: 1}]
 
-        sandbox.stub(
-            carrinhoService.carrinhoRepository,
-            carrinhoService.carrinhoRepository.find.name
-        ).resolves(carrinho)
 
-        const result = await carrinhoService.estaNoCarrinho(produto.id, carrinho.id)
-
-        expect(carrinhoService.carrinhoRepository.find.calledWithExactly(carrinho.id)).to.be.ok
-        expect(carrinhoService.carrinhoRepository.find.calledOnce).to.be.ok
-        expect(result).to.be.ok
-
+        expect(produtosService.produtosRepository.find.calledOnce).to.be.ok
+        expect(produtosService.produtosRepository.find.calledWithExactly(idProduto)).to.be.ok
+        await expect(result).to.be.rejectedWith(expected)
     })
-    it("se o produto já estã no carrinho, então incremente mais 1.", async ()=>{
+    it("Deve incrementar 1 quando o produto já estiver no carrinho", async ()=>{
         const produto = mocks.validProduto
         const carrinho = Object.create(mocks.validCarrinho)
-        carrinho.produtos = [{ids: produto.id, qtd: 1}]
-
-        sandbox.stub(
-            carrinhoService,
-            carrinhoService.estaNoCarrinho.name
-        ).returns(true)
+        carrinho.produtos = [{id: produto.id, qtd: 1}]
 
         sandbox.stub(
             carrinhoService.carrinhoRepository,
@@ -88,14 +81,12 @@ describe('Suite Test Carrinho de compras', ()=>{
         const expected = 2
         const result = await carrinhoService.incrementaMaisUm(produto.id, carrinho.id)
 
-        expect(carrinhoService.estaNoCarrinho.calledWithExactly(produto.id, carrinho.id)).to.be.ok
-        expect(carrinhoService.estaNoCarrinho.calledOnce).to.be.ok
         expect(carrinhoService.carrinhoRepository.find.calledWithExactly(carrinho.id)).to.be.ok
         expect(carrinhoService.carrinhoRepository.find.calledOnce).to.be.ok
         expect(result.produtos[0].qtd).to.be.equal(expected)
     } )
 
-    it("deve adicionar um novo produto", async ()=>{
+    it("Deve adicionar um novo produto quado o produto não estiver no carrinho", async ()=>{
         const produto = mocks.validProduto
         const carrinho = Object.create(mocks.validCarrinho)
         carrinho.produtos = []
@@ -105,18 +96,11 @@ describe('Suite Test Carrinho de compras', ()=>{
             carrinhoService.carrinhoRepository.find.name
         ).resolves(carrinho)
 
-        sandbox.stub(
-            carrinhoService,
-            carrinhoService.estaNoCarrinho.name
-        ).returns(false)
-
         const result = await carrinhoService.adicionaNovoProduto(produto.id, carrinho.id)
         const expected = produto
 
-        expect(carrinhoService.estaNoCarrinho.calledWithExactly(produto.id, carrinho.id)).to.be.ok
-        expect(carrinhoService.estaNoCarrinho.calledOnce).to.be.ok
         expect(carrinhoService.carrinhoRepository.find.calledWithExactly(carrinho.id)).to.be.ok
-        expect(carrinhoService.carrinhoRepository.find.callCount).to.be.equal(2)
+        expect(carrinhoService.carrinhoRepository.find.calledOnce).to.be.ok
         expect(result.produtos[0]).to.be.deep.equal(expected)
 
     })

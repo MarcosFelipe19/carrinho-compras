@@ -8,6 +8,9 @@ class ProdutosService{
     async verificaProdutoDisponivel(idProduto){
         const produto = await this.produtosRepository.find(idProduto)
 
+        if(!produto){
+            throw new Error(`Produto com o ID ${idProduto} não encontrado`)
+        }
         return produto
     }
 }

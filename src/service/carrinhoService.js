@@ -24,6 +24,22 @@ class ProdutosService{
         return carrinho
     }
 
+    async decrementaMaisUm(idProduto, idCarrinho){
+        let carrinho = await this.carrinhoRepository.find(idCarrinho)
+        
+        if (!carrinho) {
+            throw new Error(`Carrinho com ID ${idCarrinho} não encontrado.`)
+         }
+
+        const produtoExistente = carrinho.produtos.find(({ id }) => id === idProduto)
+
+        if(produtoExistente){
+            produtoExistente.qtd -= 1
+            return carrinho
+        }
+        return carrinho
+    }
+
     async adicionaNovoProduto(idProduto, idCarrinho){
         const carrinho = await this.incrementaMaisUm(idProduto, idCarrinho)
 
@@ -39,6 +55,7 @@ class ProdutosService{
 
         return carrinho
     }
+
 }
 
 module.exports = ProdutosService

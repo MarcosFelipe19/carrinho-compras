@@ -1,9 +1,8 @@
-const RepositoryCarrinho = require('../repository/repositoryCarrinho')
-const RepositoryProduto = require('../repository/repositoryProduto')
 const {join} = require('path')
-const produtoDataBase = join(__dirname, "../../", "database/produtos.json")
+const RepositoryCarrinho = require('../repository/repositoryCarrinho')
 
-class ProdutosService{
+const VALOR_KM = 5
+class CarrinhoService{
     constructor({carrinho}){
         this.carrinhoRepository = new RepositoryCarrinho({file: carrinho})
     }
@@ -11,10 +10,6 @@ class ProdutosService{
     async incrementaMaisUm(idProduto, idCarrinho){
         let carrinho = await this.carrinhoRepository.find(idCarrinho)
         
-        if (!carrinho) {
-            throw new Error(`Carrinho com ID ${idCarrinho} não encontrado.`)
-         }
-
         const produtoExistente = carrinho.produtos.find(({ id }) => id === idProduto)
 
         if(produtoExistente){
@@ -27,15 +22,13 @@ class ProdutosService{
     async decrementaMaisUm(idProduto, idCarrinho){
         let carrinho = await this.carrinhoRepository.find(idCarrinho)
         
-        if (!carrinho) {
-            throw new Error(`Carrinho com ID ${idCarrinho} não encontrado.`)
-         }
-
         const produtoExistente = carrinho.produtos.find(({ id }) => id === idProduto)
 
         if(produtoExistente){
-            produtoExistente.qtd -= 1
-            return carrinho
+            if(produtoExistente.qtd === 1){
+                return this.removeProduto(idProduto, idCarrinho)
+            }
+            produtoExistente.qtd -=1
         }
         return carrinho
     }
@@ -47,15 +40,35 @@ class ProdutosService{
             return carrinho
         }
 
-        const produtos = new RepositoryProduto({file: produtoDataBase})
-    
-        const produto = await produtos.find(idProduto)
-
-        carrinho.produtos.push(produto)
+        carrinho.produtos.push({id:idProduto, qtd: 1})
 
         return carrinho
     }
 
+    async removeProduto(idProduto, idCarrinho){
+        const carrinho = await this.carrinhoRepository.find(idCarrinho)
+
+        carrinho.produtos =  carrinho.produtos.filter(produto => produto.id != idProduto)
+        return carrinho
+    }
+
+    calculaFrete(qtdKM, valorCompra){
+        if(valorCompra > 200){
+            return 0
+        }
+        const valor = qtdKM * VALOR_KM
+
+        return valor
+    }
+
+    verificaCupom(cupom){
+        let data = new Date()
+        let dataCupom = new Date(cupom.validade)
+        data = data.toLocaleDateString('pt-BR')
+        dataCupom = dataCupom.toLocaleDateString('pt-BR')
+
+        return data <= dataCupom
+    }
 }
 
-module.exports = ProdutosService
+module.exports = CarrinhoService

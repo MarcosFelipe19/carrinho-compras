@@ -1,9 +1,9 @@
 class Venda {
-    constructor({id, valor, produtos, idFrete, idCupom}){
+    constructor({id, valor, produtos, valorFrete, idCupom}){
         this.id = id
         this.produtos = produtos
         this.valor = valor
-        this.idFrete = idFrete
+        this.valorFrete = valorFrete
         this.idCupom = idCupom
     }
 }

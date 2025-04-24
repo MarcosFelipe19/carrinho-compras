@@ -5,7 +5,6 @@ const Produto = require('../src/entities/produto')
 const Venda = require('../src/entities/venda')
 const Carrinho = require('../src/entities/carrinho')
 const Cupom = require('../src/entities/cupom')
-const Frete = require('../src/entities/frete')
 
 const seedDataBase = join(__dirname, "../database/")
 
@@ -16,11 +15,6 @@ const cupom = new Cupom({
     id:faker.string.ulid(),
     desconto: faker.number.int({ min: 10, max: 50 }),
     validade: faker.date.soon({ days: 10 }) 
-})
-
-const frete = new Frete({
-    id: faker.string.ulid(),
-    qtdKm: faker.number.int({min: 5, max: 20})
 })
 
 let produtos = []
@@ -35,10 +29,13 @@ for(index = 0; index < QTD_PRODUTOS; index++){
     })
     produtos.push(produto)
     
-    produtosCarrinho.push({ids: produto.id, qtd: faker.number.int({min: 1, max: 100})})
+    produtosCarrinho.push({id: produto.id, qtd: faker.number.int({min: 1, max: 100})})
     valorprodutos = valorprodutos + (produto.preco * produto.qtd)
 }
-let valorTotal = valorprodutos + (frete.qtdKm * VALOR_KM)
+
+let valorFrete = (faker.number.int({min:2, max: 20}) * VALOR_KM)
+let valorTotal = valorprodutos + valorFrete - cupom.desconto
+
 
 if(valorprodutos > 200){
     valorTotal = valorprodutos
@@ -54,7 +51,7 @@ const venda = new Venda({
     id: faker.string.ulid(),
     produtos: produtos,
     valor: valorTotal,
-    idFrete: frete.id,
+    valorFrete: valorFrete,
     idCupom: cupom.id
 })
 
@@ -65,5 +62,4 @@ const write = (fileName, data) => {writeFile(join(seedDataBase, fileName), JSON.
     await write("venda.json", [venda])
     await write("cupom.json", [cupom])
     await write("carrinho.json", [carrinho])
-    await write("frete.json", [frete])
 })()

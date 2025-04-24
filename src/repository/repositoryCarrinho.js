@@ -1,4 +1,3 @@
-const { read } = require('fs')
 const {readFile} = require('fs/promises')
 class RepositoryCarrinho {
     constructor({file}){
@@ -12,7 +11,14 @@ class RepositoryCarrinho {
             return content
         }
 
-        return content.find(({id}) => id === idCarrinho)
+
+        const carrinho = content.find(({id}) => id === idCarrinho)
+
+        if (!carrinho) {
+            throw new Error(`Carrinho com ID ${idCarrinho} não encontrado.`)
+         }
+
+         return carrinho
     }
 }
 

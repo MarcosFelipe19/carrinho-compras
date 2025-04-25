@@ -68,9 +68,24 @@ class CarrinhoService{
         return data <= dataCupom
     }
 
-    async valorTotalCompra(carrinho, cupom, qtdKM){
-        const valorCompra = carrinho
-        const cunpomValido = this.verificaCupom(cupom)
+    async valorTotalCompra(carrinho, qtdKM, cupom = null){
+        let valorProdutos = 0
+        let valorFrete = 0
+
+        for (const element of carrinho.produtos) {
+            valorProdutos += element.valorProduto * element.qtd
+        }
+        
+        if(cupom){
+            const cunpomValido = this.verificaCupom(cupom)
+            if(cunpomValido) valorProdutos -= (cupom.desconto * valorProdutos / 100)
+        }
+
+        valorFrete = this.calculaFrete(qtdKM, valorProdutos)
+
+        let valorCompra = valorFrete + valorProdutos
+
+        return valorCompra
     }
 }
 

@@ -143,6 +143,14 @@ describe('Suite Test Carrinho de compras', ()=>{
 
         expect(result).to.be.equal(expected)
     })
+    it("o frete deve ser de 50 quando a quantidade de km for 10", () => {
+        const qtdKM = 10
+
+        const expected = 50
+        const result = carrinhoService.calculaFrete(qtdKM, 150)
+
+        expect(result).to.be.equal(expected)
+    })
     it("deve retornar true se o cupom for válido", ()=>{
         const cupom = mocks.validCupom
         const data = new Date("2025-04-24")
@@ -154,26 +162,92 @@ describe('Suite Test Carrinho de compras', ()=>{
 
         expect(result).to.be.ok
     })
-    it("deve retornar 200 quando quando o valor do produto for igual 150 e a quatidade de km for igual a 5", async ()=>{
+    it("deve retornar 300 quando o valor do produto for 300 e não tem cupom", async ()=>{
         const produto =  mocks.validProduto
         const carrinho = Object.create(mocks.validCarrinho)
-        const cupom = mocks.validCupom
         const qtdKM = 5
-        carrinho.produtos = [{id: produto.id, valorProduto: produto.preco, qtd: 1}]
-
-        sandbox.stub(
-            carrinhoService,
-            carrinhoService.verificaCupom.name
-        ).returns(false)
+        carrinho.produtos = [{id: produto.id, valorProduto: 300, qtd: 1}]
 
         sandbox.stub(
             carrinhoService,
             carrinhoService.calculaFrete.name
-        ).returns(50)
+        ).returns(0)
 
-        const expected = 200
-        const result = await carrinhoService.valorTotalCompra(produto, carrinho, cupom, qtdKM)
+        const expected = 300
+        const result = await carrinhoService.valorTotalCompra(carrinho, qtdKM)
 
+        expect(carrinhoService.calculaFrete.calledOnce).to.be.ok
+        expect(result).to.be.equal(expected)
+    })
+    it("deve dar um desconto de 50 reais quando o valor da compra for 200 reais e o cupom for de 25%", async () =>{
+        const produto =  mocks.validProduto
+        const carrinho = Object.create(mocks.validCarrinho)
+        const cupom = Object.create(mocks.validCupom)
+        cupom.desconto = 25
+        const qtdKM = 10
+        carrinho.produtos = [{id: produto.id, valorProduto: 200, qtd: 1}]
+
+        sandbox.stub(
+            carrinhoService,
+            carrinhoService.calculaFrete.name
+        ).returns(0)
+
+        sandbox.stub(
+            carrinhoService,
+            carrinhoService.verificaCupom.name
+        ).returns(true)
+
+        const expected = 150
+        const result = await carrinhoService.valorTotalCompra(carrinho, qtdKM, cupom)
+
+        expect(carrinhoService.calculaFrete.calledOnce).to.be.ok
+        expect(carrinhoService.verificaCupom.calledOnce).to.be.ok
+        expect(carrinhoService.verificaCupom.calledWithExactly(cupom)).to.be.ok
+        expect(result).to.be.equal(expected)
+    })
+    it("deve retornar 100 quando o frete for 30 reais, o produto for 70 reais e não tiver cupom", async ()=>{
+        const produto =  mocks.validProduto
+        const carrinho = Object.create(mocks.validCarrinho)
+        const qtdKM = 5
+        carrinho.produtos = [{id: produto.id, valorProduto: 70, qtd: 1}]
+
+        sandbox.stub(
+            carrinhoService,
+            carrinhoService.calculaFrete.name
+        ).returns(30)
+
+        const expected = 100
+        const result = await carrinhoService.valorTotalCompra(carrinho, qtdKM)
+
+        expect(carrinhoService.calculaFrete.calledOnce).to.be.ok
+        expect(result).to.be.equal(expected)
+    })
+    it("deve retornar 260 quando tiver 5 unidades de um produto de 40 reais, o frete de 100 reais e um cupom de 20%", async () =>{
+        const produto =  mocks.validProduto
+        const carrinho = Object.create(mocks.validCarrinho)
+        const cupom = Object.create(mocks.validCupom)
+        cupom.desconto = 20
+        const qtdKM = 20
+        carrinho.produtos = [{id: produto.id, valorProduto: 40, qtd: 5}
+            
+        ]
+
+        sandbox.stub(
+            carrinhoService,
+            carrinhoService.calculaFrete.name
+        ).returns(100)
+
+        sandbox.stub(
+            carrinhoService,
+            carrinhoService.verificaCupom.name
+        ).returns(true)
+
+        const expected = 260
+        const result = await carrinhoService.valorTotalCompra(carrinho, qtdKM, cupom)
+
+        expect(carrinhoService.calculaFrete.calledOnce).to.be.ok
+        expect(carrinhoService.verificaCupom.calledOnce).to.be.ok
+        expect(carrinhoService.verificaCupom.calledWithExactly(cupom)).to.be.ok
         expect(result).to.be.equal(expected)
     })
 })

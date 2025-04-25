@@ -33,14 +33,14 @@ class CarrinhoService{
         return carrinho
     }
 
-    async adicionaNovoProduto(idProduto, idCarrinho){
-        const carrinho = await this.incrementaMaisUm(idProduto, idCarrinho)
+    async adicionaNovoProduto(produto, idCarrinho){
+        const carrinho = await this.incrementaMaisUm(produto.id, idCarrinho)
 
-        if(carrinho.produtos.find(({id}) => id === idProduto)){
+        if(carrinho.produtos.find(({id}) => id === produto.id)){
             return carrinho
         }
 
-        carrinho.produtos.push({id:idProduto, qtd: 1})
+        carrinho.produtos.push({id:produto.id,valorProduto: produto.preco, qtd: 1})
 
         return carrinho
     }
@@ -62,12 +62,15 @@ class CarrinhoService{
     }
 
     verificaCupom(cupom){
-        let data = new Date()
-        let dataCupom = new Date(cupom.validade)
-        data = data.toLocaleDateString('pt-BR')
-        dataCupom = dataCupom.toLocaleDateString('pt-BR')
-
+        let data = new Date().toISOString().split("T")[0]
+        let dataCupom = new Date(cupom.validade).toISOString().split("T")[0]
+       
         return data <= dataCupom
+    }
+
+    async valorTotalCompra(carrinho, cupom, qtdKM){
+        const valorCompra = carrinho
+        const cunpomValido = this.verificaCupom(cupom)
     }
 }
 

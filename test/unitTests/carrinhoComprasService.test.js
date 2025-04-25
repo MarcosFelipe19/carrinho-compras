@@ -7,12 +7,10 @@ chai.use(chaiAsPromised)
 const {expect} = chai
 const sinon = require('sinon')
 
-const produtoDataBase = join(__dirname, "../../", "database/produtos.json")
 const carrinhoDataBase = join(__dirname, "../../", "database/carrinho.json")
 
 const mocks = {
     validProduto: require('../mocks/valid-produto.json'),
-    validVenda: require('../mocks/valid-venda.json'),
     validCupom: require('../mocks/valid-cupom.json'),
     validCarrinho: require('../mocks/valid-carrinho.json')
 }
@@ -36,7 +34,7 @@ describe('Suite Test Carrinho de compras', ()=>{
     it("Deve incrementar 1 quando o produto já estiver no carrinho", async ()=>{
         const produto = mocks.validProduto
         const carrinho = Object.create(mocks.validCarrinho)
-        carrinho.produtos = [{id: produto.id, qtd: 1}]
+        carrinho.produtos = [{id: produto.id, valorProduto: produto.preco, qtd: 1}]
 
         sandbox.stub(
             carrinhoService.carrinhoRepository,
@@ -68,8 +66,8 @@ describe('Suite Test Carrinho de compras', ()=>{
             carrinhoService.carrinhoRepository.find.name
         ).resolves(carrinho)
 
-        const result = await carrinhoService.adicionaNovoProduto(produto.id, carrinho.id)
-        const expected = [{id: produto.id, qtd: 1}]
+        const result = await carrinhoService.adicionaNovoProduto(produto, carrinho.id)
+        const expected = [{id: produto.id, valorProduto: produto.preco, qtd: 1}]
 
         expect(carrinhoService.carrinhoRepository.find.calledWithExactly(carrinho.id)).to.be.ok
         expect(carrinhoService.carrinhoRepository.find.calledOnce).to.be.ok
@@ -79,7 +77,7 @@ describe('Suite Test Carrinho de compras', ()=>{
     it("deve decrementar a quantidade de um produto quando tiver um produto no minimo", async () => {
         const produto = mocks.validProduto
         const carrinho = Object.create(mocks.validCarrinho)
-        carrinho.produtos = [{id: produto.id, qtd: 2}]
+        carrinho.produtos = [{id: produto.id, valorProduto: produto.preco, qtd: 2}]
 
         sandbox.stub(
             carrinhoService.carrinhoRepository,
@@ -96,7 +94,7 @@ describe('Suite Test Carrinho de compras', ()=>{
     it("deve remover um produto do carrinho quando o produto já estiver no carrinho", async ()=>{
         const produto = mocks.validProduto
         const carrinho = Object.create(mocks.validCarrinho)
-        carrinho.produtos = [{id: produto.id, qtd:1}]
+        carrinho.produtos = [{id: produto.id, valorProduto: produto.preco, qtd: 1}]
 
         sandbox.stub(
             carrinhoService.carrinhoRepository,
@@ -114,7 +112,7 @@ describe('Suite Test Carrinho de compras', ()=>{
     it("deve remover o produto quando a quantidade for igual a 0", async ()=>{
         const produto = mocks.validProduto
         const carrinho = Object.create(mocks.validCarrinho)
-        carrinho.produtos = [{id: produto.id, qtd: 1}]
+        carrinho.produtos = [{id: produto.id, valorProduto: produto.preco, qtd: 1}]
 
         sandbox.stub(
             carrinhoService.carrinhoRepository,
@@ -155,5 +153,27 @@ describe('Suite Test Carrinho de compras', ()=>{
         const result = carrinhoService.verificaCupom(cupom)
 
         expect(result).to.be.ok
+    })
+    it("deve retornar 200 quando quando o valor do produto for igual 150 e a quatidade de km for igual a 5", async ()=>{
+        const produto =  mocks.validProduto
+        const carrinho = Object.create(mocks.validCarrinho)
+        const cupom = mocks.validCupom
+        const qtdKM = 5
+        carrinho.produtos = [{id: produto.id, valorProduto: produto.preco, qtd: 1}]
+
+        sandbox.stub(
+            carrinhoService,
+            carrinhoService.verificaCupom.name
+        ).returns(false)
+
+        sandbox.stub(
+            carrinhoService,
+            carrinhoService.calculaFrete.name
+        ).returns(50)
+
+        const expected = 200
+        const result = await carrinhoService.valorTotalCompra(produto, carrinho, cupom, qtdKM)
+
+        expect(result).to.be.equal(expected)
     })
 })
